@@ -1,176 +1,215 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { 
+    LayoutDashboard, 
+    Users, 
+    ClipboardList, 
+    Settings, 
+    LogOut, 
+    Menu, 
+    X,
+    ChevronRight,
+    Briefcase,
+    Shield,
+    FileText,
+    Leaf
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import clsx from 'clsx';
+
+const SidebarItem = ({ href, icon: Icon, label, active, collapsed }) => (
+    <Link
+        href={href}
+        className={clsx(
+            'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group',
+            active 
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+        )}
+    >
+        <Icon className={clsx('w-5 h-5 shrink-0', active ? 'text-white' : 'group-hover:scale-110 transition-transform')} />
+        {!collapsed && (
+            <span className="font-medium whitespace-nowrap overflow-hidden">
+                {label}
+            </span>
+        )}
+        {active && !collapsed && <ChevronRight className="w-4 h-4 ml-auto" />}
+    </Link>
+);
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const isAdmin = user.role === 'admin';
+    const isChef = user.role === 'chef_service';
+    const isViewer = ['section_administratif', 'directeur'].includes(user.role);
+
+    const navItems = [
+        { href: route('dashboard'), icon: LayoutDashboard, label: 'Tableau de bord', active: route().current('dashboard') },
+        // Chef de Service / Viewer Links
+        { 
+            href: route('mission.index'), 
+            icon: ClipboardList, 
+            label: 'Missions', 
+            active: route().current('mission.*'),
+            show: true 
+        },
+        // Admin Links
+        { 
+            href: route('personnel.index'), 
+            icon: Users, 
+            label: 'Personnel', 
+            active: route().current('personnel.*'),
+            show: isAdmin || isChef
+        },
+        { 
+            href: route('essence.index'), 
+            icon: Leaf, 
+            label: 'Essences', 
+            active: route().current('essence.*'),
+            show: isAdmin
+        },
+        { 
+            href: route('service.index'), 
+            icon: Settings, 
+            label: 'Paramètres', 
+            active: route().current('service.*') || route().current('domaine.*') || route().current('programme.*'),
+            show: isAdmin
+        },
+    ];
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+        <div className="min-h-screen bg-slate-950 text-slate-200 flex overflow-hidden">
+            {/* Desktop Sidebar */}
+            <aside 
+                className={clsx(
+                    'hidden md:flex flex-col bg-slate-900 border-r border-slate-800 transition-all duration-300 relative z-20',
+                    isSidebarCollapsed ? 'w-20' : 'w-64'
+                )}
+            >
+                <div className="p-4 flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                        <Shield className="w-6 h-6 text-white" />
                     </div>
-                </div>
-
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
+                    {!isSidebarCollapsed && (
+                        <motion.span 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }}
+                            className="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent"
                         >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
+                            ANEF Admin
+                        </motion.span>
+                    )}
                 </div>
-            </nav>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
+                <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+                    {navItems.filter(item => item.show !== false).map((item) => (
+                        <SidebarItem 
+                            key={item.label} 
+                            {...item} 
+                            collapsed={isSidebarCollapsed} 
+                        />
+                    ))}
+                </nav>
+
+                <div className="p-4 border-t border-slate-800">
+                    <button 
+                        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                        className="w-full flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white transition-colors"
+                    >
+                        <Menu className="w-5 h-5" />
+                        {!isSidebarCollapsed && <span className="text-sm font-medium">Réduire</span>}
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+                {/* Header */}
+                <header className="h-16 bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 flex items-center justify-between px-6 z-10">
+                    <div className="flex items-center gap-4">
+                        <button 
+                            className="md:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-lg"
+                            onClick={() => setIsMobileOpen(true)}
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                        <h2 className="text-lg font-semibold text-white">
+                            {header}
+                        </h2>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="hidden sm:flex flex-col items-end mr-2">
+                            <span className="text-sm font-semibold text-white">{user.nom} {user.prenom}</span>
+                            <span className="text-xs text-slate-500 uppercase tracking-wider">{user.role?.replace('_', ' ')}</span>
+                        </div>
+                        
+                        <div className="h-10 w-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden">
+                             <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                {user.nom?.[0]}{user.prenom?.[0]}
+                             </div>
+                        </div>
+
+                        <Link 
+                            href={route('logout')} 
+                            method="post" 
+                            as="button"
+                            className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                            title="Déconnexion"
+                        >
+                            <LogOut className="w-5 h-5" />
+                        </Link>
                     </div>
                 </header>
-            )}
 
-            <main>{children}</main>
+                {/* Page Content */}
+                <main className="flex-1 overflow-y-auto p-6 custom-scrollbar bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {children}
+                    </motion.div>
+                </main>
+            </div>
+
+            {/* Mobile Sidebar Overlay */}
+            <AnimatePresence>
+                {isMobileOpen && (
+                    <>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsMobileOpen(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+                        />
+                        <motion.aside
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed left-0 top-0 bottom-0 w-64 bg-slate-900 z-40 md:hidden p-4 flex flex-col"
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <span className="text-xl font-bold text-white">ANEF Admin</span>
+                                <button onClick={() => setIsMobileOpen(false)} className="text-slate-400">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <nav className="space-y-2">
+                                {navItems.filter(item => item.show !== false).map((item) => (
+                                    <SidebarItem key={item.label} {...item} active={item.active} />
+                                ))}
+                            </nav>
+                        </motion.aside>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

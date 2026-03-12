@@ -10,7 +10,8 @@ class Essence extends Model
     use HasFactory;
 
     protected $table = 'essences';
-    protected $primaryKey = 'id_essence';
+
     protected $fillable = ['nom_essence', 'description'];
+
     public $timestamps = false;
 }

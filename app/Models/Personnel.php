@@ -10,17 +10,18 @@ class Personnel extends Model
     use HasFactory;
 
     protected $table = 'personnels';
-    protected $primaryKey = 'id_personnel';
-    protected $fillable = ['nom', 'prenom', 'email', 'telephone', 'id_service', 'id_province'];
+
+    protected $fillable = ['nom', 'email', 'telephone', 'service_id'];
+
     public $timestamps = false;
 
     public function service()
     {
-        return $this->belongsTo(Service::class, 'id_service', 'id_service');
+        return $this->belongsTo(Service::class);
     }
 
-    public function province()
+    public function missions()
     {
-        return $this->belongsTo(Province::class, 'id_province', 'id_province');
+        return $this->belongsToMany(Mission::class, 'teams');
     }
 }

@@ -10,12 +10,23 @@ class Province extends Model
     use HasFactory;
 
     protected $table = 'provinces';
-    protected $primaryKey = 'id_province';
-    protected $fillable = ['nom_province', 'id_region'];
+
+    protected $fillable = ['libelle', 'region_id'];
+
     public $timestamps = false;
 
     public function region()
     {
-        return $this->belongsTo(Region::class, 'id_region', 'id_region');
+        return $this->belongsTo(Region::class);
+    }
+
+    public function communes()
+    {
+        return $this->hasMany(Commune::class);
+    }
+
+    public function forets()
+    {
+        return $this->hasMany(Foret::class);
     }
 }

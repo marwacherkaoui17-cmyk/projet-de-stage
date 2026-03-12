@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Region extends Model
+class Domaine extends Model
 {
     use HasFactory;
 
-    protected $table = 'regions';
+    protected $table = 'domaines';
 
     protected $fillable = ['libelle'];
 
     public $timestamps = false;
 
-    public function provinces()
+    public function programmes()
     {
-        return $this->hasMany(Province::class);
+        return $this->hasMany(Programme::class);
     }
 }
