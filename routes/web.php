@@ -1,12 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MissionController;
-use App\Http\Controllers\PersonnelController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\DomaineController;
-use App\Http\Controllers\ProgrammeController;
-use App\Http\Controllers\EssenceController;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
